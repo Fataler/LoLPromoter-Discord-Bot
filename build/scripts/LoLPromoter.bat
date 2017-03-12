@@ -66,7 +66,7 @@ set CMD_LINE_ARGS=%*
 set CLASSPATH=%APP_HOME%\lib\LoLPromoter-1.0-SNAPSHOT.jar;%APP_HOME%\lib\JDA-3.0.BETA2_108.jar;%APP_HOME%\lib\orianna-2.4.6.jar;%APP_HOME%\lib\slf4j-simple-1.7.12.jar;%APP_HOME%\lib\commons-lang3-3.5.jar;%APP_HOME%\lib\commons-collections4-4.1.jar;%APP_HOME%\lib\json-20160810.jar;%APP_HOME%\lib\jna-4.2.2.jar;%APP_HOME%\lib\nv-websocket-client-1.30.jar;%APP_HOME%\lib\unirest-java-1.4.9.jar;%APP_HOME%\lib\gson-2.3.1.jar;%APP_HOME%\lib\hibernate-jpa-2.1-api-1.0.0.Final.jar;%APP_HOME%\lib\slf4j-api-1.7.12.jar;%APP_HOME%\lib\httpasyncclient-4.1.1.jar;%APP_HOME%\lib\httpmime-4.5.2.jar;%APP_HOME%\lib\httpcore-4.4.4.jar;%APP_HOME%\lib\httpcore-nio-4.4.4.jar;%APP_HOME%\lib\commons-logging-1.2.jar;%APP_HOME%\lib\httpclient-4.5.2.jar;%APP_HOME%\lib\commons-codec-1.9.jar
 
 @rem Execute LoLPromoter
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %LO_L_PROMOTER_OPTS%  -classpath "%CLASSPATH%" main.java.MessageListenerExample %CMD_LINE_ARGS%
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %LO_L_PROMOTER_OPTS%  -classpath "%CLASSPATH%" MessageListenerExample %CMD_LINE_ARGS%
 
 :end
 @rem End local scope for the variables with windows NT shell

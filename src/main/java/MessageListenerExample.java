@@ -256,7 +256,7 @@ public class MessageListenerExample extends ListenerAdapter
             }
         }
         else if(msg.equals("!s")){
-            channel.sendMessage("GAY! "+jda.getEmotes().get(10).getImageUrl()).queue();
+            channel.sendMessage("GAY! ").queue();
 
     }else if(msg.contains("!get")){
             String word="";
