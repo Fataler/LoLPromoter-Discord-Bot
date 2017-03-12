@@ -3,11 +3,11 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'application'
-mainClassName = 'main.java.MessageListenerExample'
+mainClassName = 'MessageListenerExample'
 sourceCompatibility = 1.8
 
 
-
+sourceSets.main.java.srcDirs = ['src']
 repositories {
     mavenCentral()
     jcenter()
