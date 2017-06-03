@@ -19,7 +19,6 @@ import com.robrua.orianna.type.core.championmastery.ChampionMastery;
 import com.robrua.orianna.type.core.common.Region;
 import com.robrua.orianna.type.core.currentgame.CurrentGame;
 import com.robrua.orianna.type.core.staticdata.Champion;
-import com.robrua.orianna.type.core.staticdata.ChampionSpell;
 import com.robrua.orianna.type.core.stats.ChampionStats;
 import com.robrua.orianna.type.core.summoner.Summoner;
 import com.robrua.orianna.type.exception.APIException;
@@ -27,45 +26,33 @@ import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.security.auth.login.LoginException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 public class MessageListenerExample extends ListenerAdapter
 {
     /**
      * This is the method where the program starts.
      */
-    String dd_icon="http://ddragon.leagueoflegends.com/cdn/7.5.2/img/profileicon/";
-    String dd_icon_format=".png";
-    String dd_champ_icon="http://ddragon.leagueoflegends.com/cdn/7.5.2/img/champion/";
     public static void main(String[] args)
     {
-
         RiotAPI.setAPIKey(ApiTokens.getRiotToken());
         RiotAPI.setRegion(Region.EUW);
-
-
-
         //We construct a builder for a BOT account. If we wanted to use a CLIENT account
         // we would use AccountType.CLIENT
         try
         {
-            Game game=Game.of("I AM ALIVE!");
-
             JDA jda = new JDABuilder(AccountType.BOT)
                     .setToken(ApiTokens.getBotToken())           //The token of the account that is logging in.
                     .addListener(new MessageListenerExample())  //An instance of a class that will handle events.
-                    .setGame(game)
                     .buildBlocking();  //There are 2 ways to login, blocking vs async. Blocking guarantees that JDA will be completely loaded.
         }
         catch (LoginException e)
@@ -138,10 +125,7 @@ public class MessageListenerExample extends ListenerAdapter
             String name = member.getEffectiveName();    //This will either use the Member's nickname if they have one,
             // otherwise it will default to their username. (User#getName())
 
-            if(!"Discord Bots".equals(guild.getName())){
-
-                System.out.printf("(%s)[%s]<%s>: %s\n", guild.getName(), textChannel.getName(), name, msg);
-            }
+            System.out.printf("(%s)[%s]<%s>: %s\n", guild.getName(), textChannel.getName(), name, msg);
         }
         else if (event.isFromType(ChannelType.PRIVATE)) //If this message was sent to a PrivateChannel
         {
@@ -175,8 +159,6 @@ public class MessageListenerExample extends ListenerAdapter
             // of its different forms will handle ratelimiting for you automatically!
 
             channel.sendMessage("pong!").queue();
-        }else if(msg.equals("!help")&&!bot){
-            channel.sendMessage(StaticStrings.HELP).queue();
         }
         else if (msg.equals("!roll"))
         {
@@ -194,13 +176,93 @@ public class MessageListenerExample extends ListenerAdapter
                     channel.sendMessage("The role for messageId: " + sentMessage.getId() + " wasn't very good... Must be bad luck!\n").queue();
                 }
             });
-        }else if(msg.equals("!slava")){
-            channel.sendMessage("Гей! ").queue();
+        }
+        else if (msg.startsWith("!kick"))   //Note, I used "startsWith, not equals.
+        {
+            //This is an admin command. That means that it requires specific permissions to use it, in this case
+            // it needs Permission.KICK_MEMBERS. We will have a check before we attempt to kick members to see
+            // if the logged in account actually has the permission, but considering something could change after our
+            // check we should also take into account the possibility that we don't have permission anymore, thus Discord
+            // response with a permission failure!
+            //We will use the error consumer, the second parameter in queue!
 
-    }else if(msg.contains("!get")&&!bot){
+            //We only want to deal with message sent in a Guild.
+            if (message.isFromType(ChannelType.TEXT))
+            {
+                //If no users are provided, we can't kick anyone!
+                if (message.getMentionedUsers().isEmpty())
+                {
+                    channel.sendMessage("You must mention 1 or more Users to be kicked!").queue();
+                }
+                else
+                {
+                    Guild guild = event.getGuild();
+                    Member selfMember = guild.getSelfMember();  //This is the currently logged in account's Member object.
+                    // Very similar to JDA#getSelfUser()!
+
+                    //Now, we the the logged in account doesn't have permission to kick members.. well.. we can't kick!
+                    if (!selfMember.hasPermission(Permission.KICK_MEMBERS))
+                    {
+                        channel.sendMessage("Sorry! I don't have permission to kick members in this Guild!").queue();
+                        return; //We jump out of the method instead of using cascading if/else
+                    }
+
+                    //Loop over all mentioned users, kicking them one at a time. Mwauahahah!
+                    List<User> mentionedUsers = message.getMentionedUsers();
+                    for (User user : mentionedUsers)
+                    {
+                        Member member = guild.getMember(user);  //We get the member object for each mentioned user to kick them!
+
+                        //We need to make sure that we can interact with them. Interacting with a Member means you are higher
+                        // in the Role hierarchy than they are. Remember, NO ONE is above the Guild's Owner. (Guild#getOwner())
+                        if (!selfMember.canInteract(member))
+                        {
+                            channel.sendMessage("Cannot kicked member: " + member.getEffectiveName() +", they are higher " +
+                                    "in the hierachy than I am!").queue();
+                            continue;   //Continue to the next mentioned user to be kicked.
+                        }
+
+                        //Remember, due to the fact that we're using queue we will never have to deal with RateLimits.
+                        // JDA will do it all for you so long as you are using queue!
+
+                    }
+                }
+            }
+            else
+            {
+                channel.sendMessage("This is a Guild-Only command!").queue();
+            }
+        }
+        else if (msg.equals("!block"))
+        {
+            //This is an example of how to use the block() method on RestAction. The block method acts similarly to how
+            // JDABuilder's buildBlocking works, it waits until the request has been sent before continuing execution.
+            //Most developers probably wont need this and can just use queue. If you use block, JDA will still handle ratelimit
+            // control, however it won't queue the Request to be sent after the ratelimit retry after time is past. It
+            // will instead fire a RateLimitException!
+            //One of the major advantages of block() is that it returns the object that queue's success consumer would have,
+            // but it does it in the same execution context as when the request was made. This may be important for most developers,
+            // but, honestly, queue is most likely what developers will want to use.
+
+            try
+            {
+                //Note the fact that block returns the Message object!
+                Message sentMessage = channel.sendMessage("I blocked and will return the message!").block();
+                System.out.println("Sent a message using blocking! Luckly I didn't get Ratelimited... MessageId: " + sentMessage.getId());
+            }
+            catch (RateLimitedException e)
+            {
+                System.out.println("Whoops! Got ratelimited when attempting to use a .block() on a RestAction! RetryAfter: " + e.getRetryAfter());
+            }
+        }
+        else if(msg.equals("!s")){
+            channel.sendMessage("GAY! ").queue();
+
+    }else if(msg.contains("!get")){
             String word="";
             try{
-                channel.sendTyping().queue();
+                String dd_icon="http://ddragon.leagueoflegends.com/cdn/7.5.2/img/profileicon/";
+                String dd_icon_format=".png";
                 word=msg.replace("!get","").trim();
 
                 Summoner summoner = RiotAPI.getSummonerByName(word);
@@ -211,20 +273,19 @@ public class MessageListenerExample extends ListenerAdapter
                         summoner.getLeagues().get(0).getParticipantEntry().getDivision()+" with "+
                         summoner.getLeagues().get(0).getParticipantEntry().getLeaguePoints()+" LP.";
                 channel.sendMessage(info).queue();
-                channel.sendMessage("http://avatar.leagueoflegends.com/euw/"+word+dd_icon_format).queue();
+                channel.sendMessage(dd_icon+sum_ico+dd_icon_format).queue();
             }catch (APIException e){
                 channel.sendMessage("Ranked info not found!").queue();
                 System.out.println(word);
                 e.printStackTrace();
             }
 
-        }else if(msg.contains("!curr")&&!bot){
+        }else if(msg.contains("!curr")){
             String summoner=msg.replace("!curr","");
             if (summoner.equals(""))summoner=author.getName();
             StringBuilder str=new StringBuilder();
             try{
                 channel.sendMessage("__***Getting information***__").queue();
-                channel.sendTyping().queue();
                 CurrentGame curr_game= RiotAPI.getCurrentGame(summoner);
                 int curr_game_players=curr_game.getParticipants().size();
                 int amountA=0; int amountB=0;
@@ -242,9 +303,6 @@ public class MessageListenerExample extends ListenerAdapter
                     try{
                         stats= summoner_curr.getRankedStats();
                         String name = "";
-
-
-
                         for (Map.Entry<Champion, ChampionStats> entry : stats.entrySet()) {
                             if (entry.getKey() != null) {
                                 name = entry.getKey().toString();
@@ -256,16 +314,13 @@ public class MessageListenerExample extends ListenerAdapter
                             }
                         }
                         try {
-                            ChampionMastery curr_champ_mastery =
-                                    curr_game.getParticipants().get(curr_sum)
-                                                                .getChampion().getChampionMastery(summoner_curr);
+                            ChampionMastery curr_champ_mastery = curr_game.getParticipants().get(curr_sum).getChampion().getChampionMastery(summoner_curr);
                             str.append("**"+number + " " + summoner_curr.getName() + "** is playing as `" +
-                                    champ_name + "` and he is " +"**"+
-
+                                    champ_name + "` and he is " +
                                     curr_champ_mastery.getChampionLevel() + " LVL with " +
                                     curr_champ_mastery.getChampionPoints() + " points with " +
                                     num_plays + " games and " +
-                                    win_p + "% win rate ** \n");
+                                    win_p + "% win rate \n");
 
                                     number++;
                             if (curr_sum < curr_game_players / 2) {
@@ -295,7 +350,7 @@ public class MessageListenerExample extends ListenerAdapter
                         " Team B="+
                         amountB/(curr_game_players/2)+
                         "`\n");
-                str.append("Best player of the game - **"+best_sum_name+"** with "+ biggest_mastery + " points as `"+best_sum_champ+"`.");
+                str.append("Best player of the game - **"+best_sum_name+"** with "+ biggest_mastery + " points as`"+best_sum_champ+"`.");
                 channel.sendMessage(str.toString()).queue();
             }catch (APIException e){
                 e.printStackTrace();
@@ -304,142 +359,6 @@ public class MessageListenerExample extends ListenerAdapter
             }catch (NullPointerException ne){
                 channel.sendMessage("There is no Active Game!").queue();
             }
-    }else if(msg.equals("!randChamp")||msg.equals("!rc")){
-            channel.sendTyping().queue();
-            List<Champion> champions = RiotAPI.getChampions();
-            int champs=champions.size();
-            Random rand = new Random();
-            int index=rand.nextInt(champs);
-            String champion=champions.get(index).getName();
-            String champIcon=champions.get(index).getImage().getFull()  ;
-            channel.sendMessage(author.getName()+" go play "+champion+ " "+ dd_champ_icon+champIcon).queue();
-        }else if(msg.equals("!zalupa")||msg.equals("!denis")){
-            channel.sendTyping().queue();
-        channel.sendMessage(StaticStrings.ZALUPA).queue();
-        }else if(msg.contains("!daily")&&!bot){
-            String summoner=msg.replace("!daily","");
-            try{
-                channel.sendTyping().queue();
-                Date date=RiotAPI.getRecentGames(summoner).get(0).getCreateDate();
-                Date now=new Date();
-                Long daily=now.getTime()-date.getTime();
-                    Long dailyConv=TimeUnit.HOURS.convert(daily,  TimeUnit.MILLISECONDS);
-
-                if(dailyConv<=22){
-                    channel.sendMessage(summoner+"'s daily could not be available yet, maximum wait time is - "+(22-dailyConv)+" \nLast game "+date.toString()).queue();
-                }else if(dailyConv>22){
-                    channel.sendMessage(summoner+"'s daily must be available!"+" \nLast game "+date.toString()).queue();
-                }else{
-                    channel.sendMessage("Error "+author.getName()).queue();
-                }
-            }catch (APIException e){
-                e.printStackTrace();
-                channel.sendMessage("Error "+author.getName()).queue();
-            }
-        }else if(msg.contains("!rg")&&!bot){
-            String summoner=msg.replace("!rg","");
-            try{
-                channel.sendTyping().queue();
-                channel.sendMessage("__**Getting Information**__").queue();
-                List<com.robrua.orianna.type.core.game.Game> recent = RiotAPI.getRecentGames(summoner);
-                StringBuilder str=new StringBuilder();
-                int iter=1;
-                int win_c=0;
-                for(int rec_n=0;rec_n<recent.size();rec_n++){
-                    boolean inv=recent.get(rec_n).getInvalid();
-                    String res="";
-                    boolean result=recent.get(rec_n).getStats().getWin();
-                    if(!inv){
-                        if(result){
-                            res="WIN";
-                            win_c++;
-                        }else{res="LOSE";}
-                    }else{
-                        res="Invalid";
-                    }
-
-                    String champName=recent.get(rec_n).getChampion().getName();
-                    int kills=recent.get(rec_n).getStats().getKills();
-                    int deaths=recent.get(rec_n).getStats().getDeaths();
-                    int assists=recent.get(rec_n).getStats().getAssists();
-                    String endl="**"+iter+" "+res+"** on "+champName+" with "+kills+"/"+deaths+"/"+assists+"\n";
-                    str.append(endl);
-                    iter++;
-                }
-                str.append("Won "+win_c+"/10");
-                channel.sendMessage(str.toString()).queue();
-            }catch (APIException e){
-                e.printStackTrace();
-                channel.sendMessage("Error").queue();
-            }
-        }else if(msg.contains("!ranks")&&!bot){
-            String summoner=msg.replace("!ranks","");
-            try{
-                channel.sendTyping().queue();
-                channel.sendMessage("__**Getting information**__").queue();
-                List<ChampionMastery> ranks = RiotAPI.getSummonerByName(summoner).getChampionMastery();
-                StringBuilder str = new StringBuilder();
-                int iter=1;
-                for (int i=0;i<10;i++){
-                    String summ_name=ranks.get(i).getChampion().getName();
-                    int summ_lvl=ranks.get(i).getChampionLevel();
-                    long summ_points=ranks.get(i).getChampionPoints();
-                    String result="**"+iter+" "+summ_name+"** with **"+summ_lvl+" LVL** and **"+summ_points+"** points.\n";
-                    str.append(result);
-                    iter++;
-                }
-                channel.sendMessage(str.toString()).queue();
-            }catch (APIException e){
-                e.printStackTrace();
-                channel.sendMessage("Error").queue();
-            }
-        }else if(msg.contains("!info")&&!bot){
-            String champ_name=msg.replace("!info","");
-                try{
-                    channel.sendTyping().queue();
-                    Champion champion=RiotAPI.getChampionByName(champ_name.trim());
-                    //System.out.println(champ_name);
-                    String icon=dd_champ_icon+champion.getImage().getFull();
-                    List<ChampionSpell> spells = champion.getSpells();
-                    StringBuilder str=new StringBuilder();
-                    str.append("__**"+champ_name+"**__\n");
-                    for(ChampionSpell s:spells){
-                        String name="**"+s.getName()+"**\n";
-                        String desc=s.getDescription();
-                        str.append(name+desc+"\n");
-                    }
-
-                    str.append(icon);
-                    channel.sendMessage(str.toString()).queue();
-
-                }catch (APIException e){
-                    e.printStackTrace();
-                    channel.sendMessage("Error").queue();
-                }catch (NullPointerException en){
-                    channel.sendMessage("No champion found").queue();
-                }
-            }else if(msg.contains("!call")&&!bot){
-            MessageBuilder ms=new MessageBuilder();
-
-            channel.sendMessage(ms.append("Пойдем в Лигу Легенд!").setTTS(true).build()).queue();
-        }else if(msg.contains("!write")&&!bot){
-            String name=Translit.toTranslit(msg.replace("!write","").trim().toLowerCase()).replaceAll("[^a-zA-Z]", " ");
-
-            //System.out.println(name);
-            StringBuilder str=new StringBuilder();
-            for(char ch : name.toCharArray()){
-                if (!String.valueOf(ch).equals(" ")){
-                    str.append(":regional_indicator_"+String.valueOf(ch)+": ");
-
-                }else{
-                    str.append("   ");
-                }
-            }
-            channel.sendMessage(str.toString()).queue();
-        }
-        }
-        /*else if(event.isFromType(ChannelType.PRIVATE)&&msg.contains("!fromBot")&&!bot){
-            TextChannel textChannel = event.getTextChannel();
-            textChannel.sendMessage(msg).queue();
-        }*/
     }
+    }
+}
