@@ -36,6 +36,7 @@ public class StaticStrings {
                     "!ranks {Summoner Name} - информация о рангах призывателя \n"+
                     "!info {Champion Name} - информация о чемпионе\n"+
                     "!call - позвать всех, кто есть в воис чате.\n"+
+                    "!write {Text} - написать текст при помощи Emoji.\n"+
                     "!zalupa [!denis] - залупа.\n" +
                     "!slava - информация о Славике.\n";
 }
