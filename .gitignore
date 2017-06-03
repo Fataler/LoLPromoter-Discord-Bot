@@ -1,5 +1,6 @@
 .idea/
 .gradle/
+.gitignore
 build/classes/main/StaticStrings.class
 build/classes/main/Translit.class
 build/dependency-cache/
