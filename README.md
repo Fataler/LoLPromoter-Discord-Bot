@@ -3,8 +3,6 @@
 
 Special Bot for League of Legends Players. Can do a lot of things. Use !help for more info.
 
-!help for more info 
-
 Language - Russian 
 
 Bot in development right now 
