@@ -1,47 +1,27 @@
+group 'LoLPromoter'
+version '1.0-SNAPSHOT'
+
 apply plugin: 'java'
 apply plugin: 'application'
-
-mainClassName  = "MessageListenerExample"
-version = '1.0'
+mainClassName = 'MessageListenerExample'
 sourceCompatibility = 1.8
 
 
-
-
+sourceSets.main.java.srcDirs = ['src']
 repositories {
     mavenCentral()
     jcenter()
 }
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.2'
-}
-
 
 
 dependencies {
-
+    testCompile group: 'junit', name: 'junit', version: '4.11'
 	runtime "org.slf4j:slf4j-simple:1.7.12"
     compile 'net.dv8tion:JDA:3.0.BETA2_108'
     compile 'com.robrua:orianna:2.4.6'
 
-
 }
 
-
-//create a single Jar with all dependencies
-task fatJar(type: Jar) {
-
-    manifest {
-        attributes 'Implementation-Title': 'LoL Promoter v0.1',
-                'Implementation-Version': version,
-                'Main-Class': 'MessageListenerExample',
-                'Encoding':'UTF-8'
-    }
-    baseName ='lol'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
+task stage {
+    dependsOn installDist
 }
