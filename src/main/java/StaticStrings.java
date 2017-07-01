@@ -27,16 +27,16 @@ public class StaticStrings {
             "──██▒▒▒▒▒▒▒▒▒██████▒▒▒▒▒▒▒▒▒▒██──\n" +
             "───███████████▌▌▌▌████████████───";
     public static String HELP=
-                    "!help - общая помощь. \n" +
-                    "!rc [!randChamp] - случайный чемпион.\n" +
-                    "!curr {Summoner Name} - текущая игра.\n" +
-                    "!get {Summoner Name} - информация о ранге призывателя. \n" +
-                    "!daily {Summoner Name} - информация о доступности дейлика.\n" +
-                    "!rg {Summoner Name} - информация о последних 10 играх призывателя.\n"+
-                    "!ranks {Summoner Name} - информация о рангах призывателя \n"+
-                    "!info {Champion Name} - информация о чемпионе\n"+
-                    "!call - позвать всех, кто есть в воис чате.\n"+
-                    "!write {Text} - написать текст при помощи Emoji.\n"+
-                    "!zalupa [!denis] - залупа.\n" +
-                    "!slava - информация о Славике.\n";
+                    "!help - this message. \n" +
+                    "!rc [!randChamp] - get random champ to play.\n" +
+                    "!curr {Summoner Name} - information about currient game.\n" +
+                    "!get {Summoner Name} - ranked info about summoner. \n" +
+                    "!daily {Summoner Name} - information about summoner's daily bonus.\n" +
+                    "!rg {Summoner Name} - information about last 10 games.\n"+
+                    "!ranks {Summoner Name} - information about champ mastery. \n"+
+                    "!info {Champion Name} - information about champion. \n"+
+                    "!call - call to the League.\n"+
+                    "!write {Text} - Write text with Emoji.\n"+
+                    "!zalupa [!denis] - hmmm.\n"+
+                    "!slava - info about Slava.\n";
 }

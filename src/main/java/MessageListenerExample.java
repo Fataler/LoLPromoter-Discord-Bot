@@ -34,17 +34,12 @@ import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.security.auth.login.LoginException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class MessageListenerExample extends ListenerAdapter
 {
-    /**
-     * This is the method where the program starts.
-     */
+
     String dd_icon="http://ddragon.leagueoflegends.com/cdn/7.5.2/img/profileicon/";
     String dd_icon_format=".png";
     String dd_champ_icon="http://ddragon.leagueoflegends.com/cdn/7.5.2/img/champion/";
@@ -53,20 +48,21 @@ public class MessageListenerExample extends ListenerAdapter
 
         RiotAPI.setAPIKey(ApiTokens.getRiotToken());
         RiotAPI.setRegion(Region.EUW);
-
+        JDA jda;
 
 
         //We construct a builder for a BOT account. If we wanted to use a CLIENT account
         // we would use AccountType.CLIENT
         try
         {
-            Game game=Game.of("I AM ALIVE!");
+            Game game=Game.of("I AM ALIVE! (EUW only)");
 
-            JDA jda = new JDABuilder(AccountType.BOT)
+            jda = new JDABuilder(AccountType.BOT)
                     .setToken(ApiTokens.getBotToken())           //The token of the account that is logging in.
                     .addListener(new MessageListenerExample())  //An instance of a class that will handle events.
                     .setGame(game)
                     .buildBlocking();  //There are 2 ways to login, blocking vs async. Blocking guarantees that JDA will be completely loaded.
+
         }
         catch (LoginException e)
         {
@@ -141,6 +137,7 @@ public class MessageListenerExample extends ListenerAdapter
             if(!"Discord Bots".equals(guild.getName())){
 
                 System.out.printf("(%s)[%s]<%s>: %s\n", guild.getName(), textChannel.getName(), name, msg);
+
             }
         }
         else if (event.isFromType(ChannelType.PRIVATE)) //If this message was sent to a PrivateChannel
@@ -195,7 +192,7 @@ public class MessageListenerExample extends ListenerAdapter
                 }
             });
         }else if(msg.equals("!slava")){
-            channel.sendMessage("Гей! ").queue();
+            channel.sendMessage("Gay! ").queue();
 
     }else if(msg.contains("!get")&&!bot){
             String word="";
@@ -379,6 +376,7 @@ public class MessageListenerExample extends ListenerAdapter
                 channel.sendMessage("__**Getting information**__").queue();
                 List<ChampionMastery> ranks = RiotAPI.getSummonerByName(summoner).getChampionMastery();
                 StringBuilder str = new StringBuilder();
+                str.append("Summoner **"+summoner+"** have total **"+RiotAPI.getSummonerByName(summoner).getTotalMasteryLevel()+"** mastery points. \n");
                 int iter=1;
                 for (int i=0;i<10;i++){
                     String summ_name=ranks.get(i).getChampion().getName();
@@ -421,7 +419,7 @@ public class MessageListenerExample extends ListenerAdapter
             }else if(msg.contains("!call")&&!bot){
             MessageBuilder ms=new MessageBuilder();
 
-            channel.sendMessage(ms.append("Пойдем в Лигу Легенд!").setTTS(true).build()).queue();
+            channel.sendMessage(ms.append("Let's go to the League of Legends!").setTTS(true).build()).queue();
         }else if(msg.contains("!write")&&!bot){
             String name=Translit.toTranslit(msg.replace("!write","").trim().toLowerCase()).replaceAll("[^a-zA-Z]", " ");
 
@@ -436,6 +434,24 @@ public class MessageListenerExample extends ListenerAdapter
                 }
             }
             channel.sendMessage(str.toString()).queue();
+        }
+        else if(msg.contains("!status")&&!bot){
+            int guilds=jda.getGuilds().size();
+            int people=0;
+            StringBuilder str= new StringBuilder();
+            str.append("Alive at "+guilds+" servers.\n");
+            int number=1;
+            for(int i=0;i<guilds;i++){
+                Guild guild=jda.getGuilds().get(i);
+                str.append(number+") "+guild.getName()+" with "+guild.getMembers().size()+" people. \n");
+                people+=guild.getMembers().size();
+                number++;
+            }
+            str.append("SUM Members "+people);
+            MessageBuilder messageBuilder = new MessageBuilder();
+            Queue<Message> m = messageBuilder.append(str).buildAll(MessageBuilder.SplitPolicy.NEWLINE);
+            m.forEach(mss -> event.getChannel().sendMessage(mss.getRawContent()).queue());
+
         }
         }
         /*else if(event.isFromType(ChannelType.PRIVATE)&&msg.contains("!fromBot")&&!bot){
