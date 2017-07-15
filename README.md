@@ -7,6 +7,7 @@ Language - English
 
 Bot in development right now 
 GitHub page : https://fataler.github.io/LoLPromoter-Discord-Bot/
+
 Invite : https://discordapp.com/oauth2/authorize?client_id=290225453354975232&scope=bot&permissions=7168 
 
 * !help - this message. 
