@@ -55,7 +55,7 @@ public class MessageListenerExample extends ListenerAdapter
         // we would use AccountType.CLIENT
         try
         {
-            Game game=Game.of("I AM ALIVE! (EUW only)");
+            Game game=Game.of("I AM ALIVE! (EUW only)"); //
 
             jda = new JDABuilder(AccountType.BOT)
                     .setToken(ApiTokens.getBotToken())           //The token of the account that is logging in.
@@ -120,7 +120,10 @@ public class MessageListenerExample extends ListenerAdapter
 
         boolean bot = author.isBot();                     //This boolean is useful to determine if the User that
         // sent the Message is a BOT or not!
+        if(Arrays.stream(StaticStrings.COMMANDS).anyMatch(msg::contains)&&!bot){ //Arrays.asList(StaticStrings.COMMANDS).contains(msg)
 
+            logServer(msg,jda,event);
+        }
         if (event.isFromType(ChannelType.TEXT))         //If this message was sent to a Guild TextChannel
         {
             //Because we now know that this message was sent in a Guild, we can do guild specific things
@@ -155,6 +158,8 @@ public class MessageListenerExample extends ListenerAdapter
             String groupName = group.getName() != null ? group.getName() : "";  //A group name can be null due to it being unnamed.
 
             System.out.printf("[GRP: %s]<%s>: %s\n", groupName, author.getName(), msg);
+
+
         }
 
 
@@ -172,7 +177,7 @@ public class MessageListenerExample extends ListenerAdapter
             // of its different forms will handle ratelimiting for you automatically!
 
             channel.sendMessage("pong!").queue();
-        }else if(msg.equals("!help")&&!bot){
+        }else if(msg.equals("!bhelp")&&!bot){
             channel.sendMessage(StaticStrings.HELP).queue();
         }
         else if (msg.equals("!roll"))
@@ -447,12 +452,24 @@ public class MessageListenerExample extends ListenerAdapter
                 people+=guild.getMembers().size();
                 number++;
             }
-            str.append("SUM Members "+people);
+            str.append("SUM Members "+people+"  .");
             MessageBuilder messageBuilder = new MessageBuilder();
             Queue<Message> m = messageBuilder.append(str).buildAll(MessageBuilder.SplitPolicy.NEWLINE);
             m.forEach(mss -> event.getChannel().sendMessage(mss.getRawContent()).queue());
-
+        }else if(msg.contains("!donate")&&!bot){
+            channel.sendMessage(StaticStrings.DONATE).queue();
+        }else if(msg.contains("!invite")&&!bot){
+            channel.sendMessage(StaticStrings.INVITE).queue();
+        }else if(msg.contains("!bliz")&&!bot){
+            channel.sendMessage(StaticStrings.SERVER).queue();
         }
+        }
+        public void logServer(String command,JDA jda,MessageReceivedEvent event){
+            String guild=event.getGuild().getName();
+            String author=event.getAuthor().getName();
+            jda.getGuildById("335390036931379202").getTextChannelById("335392770510422016").sendMessage(
+                    ":white_circle:  "+guild+" "+author+" ** "+ command+" **\n"
+                    ).queue();
         }
         /*else if(event.isFromType(ChannelType.PRIVATE)&&msg.contains("!fromBot")&&!bot){
             TextChannel textChannel = event.getTextChannel();
