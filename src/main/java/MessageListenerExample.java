@@ -120,7 +120,7 @@ public class MessageListenerExample extends ListenerAdapter
 
         boolean bot = author.isBot();                     //This boolean is useful to determine if the User that
         // sent the Message is a BOT or not!
-        if(Arrays.stream(StaticStrings.COMMANDS).anyMatch(msg::contains)&&!bot){ //Arrays.asList(StaticStrings.COMMANDS).contains(msg)
+        if(Arrays.stream(StaticStrings.COMMANDS).anyMatch(msg::contains)&&!bot&&msg!=null){ //Arrays.asList(StaticStrings.COMMANDS).contains(msg)
 
             logServer(msg,jda,event);
         }
