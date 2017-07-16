@@ -460,7 +460,7 @@ public class MessageListenerExample extends ListenerAdapter
             channel.sendMessage(StaticStrings.DONATE).queue();
         }else if(msg.contains("!invite")&&!bot){
             channel.sendMessage(StaticStrings.INVITE).queue();
-        }else if(msg.contains("!bliz")&&!bot){
+        }else if(msg.contains("!blitz")&&!bot){
             channel.sendMessage(StaticStrings.SERVER).queue();
         }
         }

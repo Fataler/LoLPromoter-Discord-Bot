@@ -46,7 +46,7 @@ public class StaticStrings {
                     "!blitz - Our support and log server.\n"+
                     "!zalupa [!denis] - hmmm.\n"+
                     "!slava - info about Slava.\n";
-    public static String[] COMMANDS=new String[] {"!help","!donate","!invite","!daily","!rc","!curr","!get","!rg ","!ranks","!info",
+    public static String[] COMMANDS=new String[] {"!bhelp","!donate","!invite","!daily","!rc","!curr","!get","!rg ","!ranks","!info",
             "!call","!write","!blitz","!zalupa","!slava"};
     public static final Set<String> VALUES = new HashSet<String>(Arrays.asList(
             new String[] {"!help","!donate","!invite","!daily","!rc","!curr","!get","!rg","!ranks","!info",
