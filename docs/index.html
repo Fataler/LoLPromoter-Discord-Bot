@@ -11,20 +11,20 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="icon" type="image/png" href="images/favicon.png" />
 </head>
+
 <body>
 
-    <div class="demo-blog mdl-layout mdl-js-layout has-drawer is-upgraded">
-      <main class="mdl-layout__content">
-        <div class="demo-blog__posts mdl-grid">
-              <div class="mdl-card something-else mdl-cell mdl-cell--8-col mdl-cell--4-col-desktop mdl-shadow--6dp">
-           
-            <div class="mdl-card__media mdl-color--white mdl-color-text--grey-600 ">
-              <img class="avatar" src="images/icon.png">
-              Discord bot for League of Legends with 130+ servers  and more then 29k users.
-            </div>
-            <div class="mdl-card__actions mdl-card--border meta meta--fill mdl-color-text--grey-600">
-              
-                <a class="mdl-button mdl-button--accent  mdl-js-button mdl-js-ripple-effect" href="https://discordapp.com/oauth2/authorize?client_id=290225453354975232&scope=bot&permissions=7168" target="_blank">
+	<div class="demo-blog mdl-layout mdl-js-layout has-drawer is-upgraded">
+		<main class="mdl-layout__content">
+			<div class="demo-blog__posts mdl-grid">
+				<div class="mdl-card something-else mdl-cell mdl-cell--8-col mdl-cell--4-col-desktop mdl-shadow--6dp">
+
+					<div class="mdl-card__media mdl-color--white mdl-color-text--grey-600 ">
+						<img class="avatar" src="images/icon.png"> Discord bot for League of Legends with 130+ servers and more then 29k users.
+					</div>
+					<div class="mdl-card__actions mdl-card--border meta meta--fill mdl-color-text--grey-600">
+
+						<a class="mdl-button mdl-button--accent  mdl-js-button mdl-js-ripple-effect" href="https://discordapp.com/oauth2/authorize?client_id=290225453354975232&scope=bot&permissions=7168" target="_blank">
       				Invite bot to server!
     			</a>
 						<i class="material-icons">library_add</i>
@@ -77,13 +77,26 @@
 					</ul>
 
 				</div>
+
 				<div class="mdl-mini-footer--middle-section">
 					<ul class="mdl-mini-footer__link-list">
 						<li><a href="https://discordapp.com/oauth2/authorize?client_id=290225453354975232&scope=bot&permissions=7168" target="_blank">Invite!</a></li>
 						<li><a href="http://yasobe.ru/na/lolpromoter" target="_blank">Donate!</a></li>
 						<li><a href="https://bots.discord.pw/bots/290225453354975232" target="_blank">Discord Bots</a></li>
+						<li><a id="terms" href="#">Terms</a></li>
 					</ul>
 				</div>
+				<dialog class="mdl-dialog">
+					<div class="mdl-dialog__content">
+						<p>
+							Blitz isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends™ and Riot Games are trademarks or registered trademarks of Riot Games, Inc.
+						</p>
+					</div>
+					<div class="mdl-dialog__actions mdl-dialog__actions--full-width">
+
+						<button type="button" class="mdl-button close">Ok</button>
+					</div>
+				</dialog>
 			</footer>
 
 		</main>
@@ -102,8 +115,20 @@
 		</div>
 	</div>
 
+	<script>
+		var dialog = document.querySelector('dialog');
+		var showModalButton = document.querySelector('#terms');
+		if (!dialog.showModal) {
+			dialogPolyfill.registerDialog(dialog);
+		}
+		showModalButton.addEventListener('click', function() {
+			dialog.showModal();
+		});
+		dialog.querySelector('.close').addEventListener('click', function() {
+			dialog.close();
+		});
 
+	</script>
 </body>
 
 </html>
-         
