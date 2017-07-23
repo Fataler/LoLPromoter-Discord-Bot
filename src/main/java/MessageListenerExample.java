@@ -120,7 +120,7 @@ public class MessageListenerExample extends ListenerAdapter
 
         boolean bot = author.isBot();                     //This boolean is useful to determine if the User that
         // sent the Message is a BOT or not!
-        if(Arrays.stream(StaticStrings.COMMANDS).anyMatch(msg::contains)&&!bot&&msg!=null){ //Arrays.asList(StaticStrings.COMMANDS).contains(msg)
+        if(Arrays.stream(StaticStrings.COMMANDS).anyMatch(msg::contains)&&!bot&&msg!=null&&jda!=null&&event!=null){ //Arrays.asList(StaticStrings.COMMANDS).contains(msg)
 
             logServer(msg,jda,event);
         }
@@ -353,9 +353,9 @@ public class MessageListenerExample extends ListenerAdapter
                     boolean result=recent.get(rec_n).getStats().getWin();
                     if(!inv){
                         if(result){
-                            res="WIN";
+                            res="WIN     ";
                             win_c++;
-                        }else{res="LOSE";}
+                        }else{res="LOSE    ";}
                     }else{
                         res="Invalid";
                     }
@@ -364,7 +364,9 @@ public class MessageListenerExample extends ListenerAdapter
                     int kills=recent.get(rec_n).getStats().getKills();
                     int deaths=recent.get(rec_n).getStats().getDeaths();
                     int assists=recent.get(rec_n).getStats().getAssists();
-                    String endl="**"+iter+" "+res+"** on "+champName+" with "+kills+"/"+deaths+"/"+assists+"\n";
+                    String gamemode=recent.get(rec_n).getMode().name();
+                    String endl="**"+iter+" "+res+"** on "+champName+" with   "+kills+"/"+deaths+"/"+assists+" ("+
+                            gamemode+") \n";
                     str.append(endl);
                     iter++;
                 }
@@ -462,14 +464,26 @@ public class MessageListenerExample extends ListenerAdapter
             channel.sendMessage(StaticStrings.INVITE).queue();
         }else if(msg.contains("!blitz")&&!bot){
             channel.sendMessage(StaticStrings.SERVER).queue();
+        }else if(msg.contains("!bmeschange")&&!bot){
+            String newMes=msg.replace("!bmeschange","");
+            jda.asBot().getJDA().getPresence().setGame(Game.of(newMes));
         }
+
         }
         public void logServer(String command,JDA jda,MessageReceivedEvent event){
+        if (event.isFromType(ChannelType.GROUP)){
             String guild=event.getGuild().getName();
             String author=event.getAuthor().getName();
             jda.getGuildById("335390036931379202").getTextChannelById("335392770510422016").sendMessage(
-                    ":white_circle:  "+guild+" "+author+" ** "+ command+" **\n"
-                    ).queue();
+                    ":white_circle:  "+guild+" | "+author+" | ** "+ command+" **\n"
+            ).queue();
+        }else{
+            String author=event.getAuthor().getName();
+            jda.getGuildById("335390036931379202").getTextChannelById("335392770510422016").sendMessage(
+                    ":white_circle:  {PM}"+" | "+author+" | ** "+ command+" **\n"
+            ).queue();
+        }
+
         }
         /*else if(event.isFromType(ChannelType.PRIVATE)&&msg.contains("!fromBot")&&!bot){
             TextChannel textChannel = event.getTextChannel();
