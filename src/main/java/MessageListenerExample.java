@@ -23,6 +23,9 @@ import com.robrua.orianna.type.core.staticdata.ChampionSpell;
 import com.robrua.orianna.type.core.stats.ChampionStats;
 import com.robrua.orianna.type.core.summoner.Summoner;
 import com.robrua.orianna.type.exception.APIException;
+import io.bretty.console.table.Alignment;
+import io.bretty.console.table.ColumnFormatter;
+import io.bretty.console.table.Table;
 import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -344,18 +347,24 @@ public class MessageListenerExample extends ListenerAdapter
                 channel.sendTyping().queue();
                 channel.sendMessage("__**Getting Information**__").queue();
                 List<com.robrua.orianna.type.core.game.Game> recent = RiotAPI.getRecentGames(summoner);
-                StringBuilder str=new StringBuilder();
                 int iter=1;
                 int win_c=0;
+
+                String[] numbers= new String[10];
+                String[] results= new String[10];
+                String [] champions= new String[10];
+                String [] kdas= new String[10];
+                String [] gamemodes= new String[10];
+
                 for(int rec_n=0;rec_n<recent.size();rec_n++){
                     boolean inv=recent.get(rec_n).getInvalid();
                     String res="";
                     boolean result=recent.get(rec_n).getStats().getWin();
                     if(!inv){
                         if(result){
-                            res="WIN     ";
+                            res="WIN";
                             win_c++;
-                        }else{res="LOSE    ";}
+                        }else{res="LOSE";}
                     }else{
                         res="Invalid";
                     }
@@ -364,14 +373,35 @@ public class MessageListenerExample extends ListenerAdapter
                     int kills=recent.get(rec_n).getStats().getKills();
                     int deaths=recent.get(rec_n).getStats().getDeaths();
                     int assists=recent.get(rec_n).getStats().getAssists();
+                    String kda=String.valueOf(kills)+"/"+String.valueOf(deaths)+"/"+String.valueOf(assists);
                     String gamemode=recent.get(rec_n).getMode().name();
-                    String endl="**"+iter+" "+res+"** on "+champName+" with   "+kills+"/"+deaths+"/"+assists+" ("+
-                            gamemode+") \n";
-                    str.append(endl);
+
+                    numbers[rec_n]=String.valueOf(iter);
+                    results[rec_n]=res;
+                    champions[rec_n]=champName;
+                    kdas[rec_n]=kda;
+                    gamemodes[rec_n]=gamemode;
+
+
                     iter++;
                 }
-                str.append("Won "+win_c+"/10");
-                channel.sendMessage(str.toString()).queue();
+
+                ColumnFormatter<String> iterFormatter = ColumnFormatter.text(Alignment.RIGHT, 3);
+                ColumnFormatter<String> resultFormatter = ColumnFormatter.text(Alignment.CENTER, 8);
+                ColumnFormatter<String> championFormatter = ColumnFormatter.text(Alignment.CENTER, 16);
+                ColumnFormatter<String> kdaFormatter = ColumnFormatter.text(Alignment.CENTER, 12);
+
+
+                Table.Builder builder = new Table.Builder("№", numbers, iterFormatter);
+                builder.addColumn("W/L", results, resultFormatter);
+                builder.addColumn("CHAMPION", champions, championFormatter);
+                builder.addColumn("K/D/A", kdas, kdaFormatter);
+                builder.addColumn("GAME MODE", gamemodes, kdaFormatter);
+
+                Table table = builder.build();
+
+                channel.sendMessage("```css\n"+table+"\n```").queue();
+                channel.sendMessage("Won "+win_c+"/10").queue();
             }catch (APIException e){
                 e.printStackTrace();
                 channel.sendMessage("Error").queue();
@@ -383,17 +413,40 @@ public class MessageListenerExample extends ListenerAdapter
                 channel.sendMessage("__**Getting information**__").queue();
                 List<ChampionMastery> ranks = RiotAPI.getSummonerByName(summoner).getChampionMastery();
                 StringBuilder str = new StringBuilder();
-                str.append("Summoner **"+summoner+"** have total **"+RiotAPI.getSummonerByName(summoner).getTotalMasteryLevel()+"** mastery points. \n");
+                str.append("Summoner "+summoner+" have total "+RiotAPI.getSummonerByName(summoner).getTotalMasteryLevel()+" mastery points. \n");
                 int iter=1;
+                String[] iters=new String[10];
+                String[] champ_names=new String[10];
+                String[] sum_lvls=new String[10];
+                String[] sum_points_arr=new String[10];
                 for (int i=0;i<10;i++){
                     String summ_name=ranks.get(i).getChampion().getName();
                     int summ_lvl=ranks.get(i).getChampionLevel();
                     long summ_points=ranks.get(i).getChampionPoints();
-                    String result="**"+iter+" "+summ_name+"** with **"+summ_lvl+" LVL** and **"+summ_points+"** points.\n";
-                    str.append(result);
+                    iters[i]=String.valueOf(iter);
+                    champ_names[i]=summ_name;
+                    sum_lvls[i]=String.valueOf(summ_lvl);
+                    sum_points_arr[i]=String.valueOf(summ_points);
+
+                    /// /String result="**"+iter+" "+summ_name+"** with **"+summ_lvl+" LVL** and **"+summ_points+"** points.\n";
+
                     iter++;
                 }
-                channel.sendMessage(str.toString()).queue();
+
+                ColumnFormatter<String> iterFormatter = ColumnFormatter.text(Alignment.RIGHT, 3);
+                ColumnFormatter<String> formatter = ColumnFormatter.text(Alignment.CENTER, 15);
+
+
+
+                Table.Builder builder = new Table.Builder("№", iters, iterFormatter);
+                builder.addColumn("CHAMPION NAME", champ_names, formatter);
+                builder.addColumn("LVL", sum_lvls, formatter);
+                builder.addColumn("POINTS", sum_points_arr, formatter);
+
+
+                Table table = builder.build();
+                str.append(table);
+                channel.sendMessage("```css\n"+str+"\n```").queue();
             }catch (APIException e){
                 e.printStackTrace();
                 channel.sendMessage("Error").queue();
@@ -471,7 +524,7 @@ public class MessageListenerExample extends ListenerAdapter
 
         }
         public void logServer(String command,JDA jda,MessageReceivedEvent event){
-        if (event.isFromType(ChannelType.GROUP)){
+        if (event.isFromType(ChannelType.TEXT)){
             String guild=event.getGuild().getName();
             String author=event.getAuthor().getName();
             jda.getGuildById("335390036931379202").getTextChannelById("335392770510422016").sendMessage(
